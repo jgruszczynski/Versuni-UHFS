@@ -71,7 +71,7 @@ last_probe_id <- fds_cl |>
   group_by(project_id) |>
   slice_head(n = 1) 
 
-if (!(last_probe_id %in% alerts_db)) {
+if (!(last_probe_id$scan_ml_probe_id %in% alerts_db)) {
     alerts_fds <- fds_cl |>
       filter(scan_ml_probe_id %in% last_probes$scan_ml_probe_id) |>
       select(project_product_id, shop_url, scan_ml_probe_datetime, scan_ml_product_price) |>
@@ -248,7 +248,7 @@ if (!(last_probe_id %in% alerts_db)) {
     }
     
     ## 3.0 Add probe id to the tracker ----
-    cat(last_probe_id, file = 'alerts_db.txt', append = TRUE, sep = "\n")
+    cat(last_probe_id$scan_ml_probe_id, file = 'alerts_db.txt', append = TRUE, sep = "\n")
     print(paste0('Alerts for probe ', last_probe_id , ' sent'))
 } else {
   print(paste0('Alerts for probe ', last_probe_id , ' was already sent'))
