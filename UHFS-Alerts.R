@@ -75,10 +75,14 @@ new_probes_to_alert <- last_probe_id |>
   ungroup() |>
   select(scan_ml_probe_id) |>
   filter(!(scan_ml_probe_id %in% alerts_db))
+
+projects_to_process <- last_probes |>
+  filter(scan_ml_probe_id %in% new_probes_to_alert$scan_ml_probe_id) |>
+  pull(project_id)
  
 if (nrow(new_probes_to_alert) > 0) {
     alerts_fds <- fds_cl |>
-      filter(scan_ml_probe_id %in% new_probes_to_alert$scan_ml_probe_id) |>
+      filter(project_id %in% projects_to_process) |>
       filter(scan_ml_probe_id %in% last_probes$scan_ml_probe_id) |>
       select(project_product_id, shop_url, scan_ml_probe_datetime, scan_ml_product_price) |>
       arrange(project_product_id, shop_url , desc(scan_ml_probe_datetime)) |>
