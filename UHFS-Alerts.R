@@ -71,8 +71,14 @@ last_probe_id <- fds_cl |>
   group_by(project_id) |>
   slice_head(n = 1) 
 
-if (!(last_probe_id$scan_ml_probe_id %in% alerts_db)) {
+new_probes_to_alert <- last_probe_id |>
+  ungroup() |>
+  select(scan_ml_probe_id) |>
+  filter(!(scan_ml_probe_id %in% alerts_db))
+ 
+if (nrow(new_probes_to_alert) > 0) {
     alerts_fds <- fds_cl |>
+      filter(scan_ml_probe_id %in% new_probes_to_alert$scan_ml_probe_id) |>
       filter(scan_ml_probe_id %in% last_probes$scan_ml_probe_id) |>
       select(project_product_id, shop_url, scan_ml_probe_datetime, scan_ml_product_price) |>
       arrange(project_product_id, shop_url , desc(scan_ml_probe_datetime)) |>
@@ -93,6 +99,7 @@ if (!(last_probe_id$scan_ml_probe_id %in% alerts_db)) {
       filter(!is.na(previous_price))
     
     sellers <- fds_cl |>
+      filter(scan_ml_probe_id %in% new_probes_to_alert$scan_ml_probe_id) |>
       filter(scan_ml_probe_id %in% last_probe_id$scan_ml_probe_id) |>
       select(project_product_id, shop_url, scan_ml_product_seller_name) |>
       unique() 
