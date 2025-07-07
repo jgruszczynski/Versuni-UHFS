@@ -101,12 +101,27 @@ if (nrow(new_probes_to_alert) > 0) {
       filter(price_trend != "same") |>
       filter(!is.na(current_price)) |>
       filter(!is.na(previous_price))
+      
     
     sellers <- fds_cl |>
       filter(scan_ml_probe_id %in% new_probes_to_alert$scan_ml_probe_id) |>
       filter(scan_ml_probe_id %in% last_probe_id$scan_ml_probe_id) |>
-      select(project_product_id, shop_url, scan_ml_product_seller_name) |>
-      unique() 
+      select(project_product_id, shop_url, scan_ml_product_seller_name, scan_ml_product_available, scan_ml_product_buybox_win, scan_ml_product_3thparty) |>
+      mutate(seller01 = case_when(
+        scan_ml_product_available == 1  & scan_ml_product_buybox_win == 1 & scan_ml_product_3thparty == 1 ~ scan_ml_product_seller_name,
+        scan_ml_product_available == 1  & scan_ml_product_buybox_win == 1 & scan_ml_product_3thparty == 0 ~ "",
+        scan_ml_product_available == 1  & scan_ml_product_buybox_win == 0 & scan_ml_product_3thparty == 1 ~ scan_ml_product_seller_name,
+        scan_ml_product_available == 1  & scan_ml_product_buybox_win == 0 & scan_ml_product_3thparty == 0 ~ scan_ml_product_seller_name,
+        scan_ml_product_available == 0  & scan_ml_product_buybox_win == 1 & scan_ml_product_3thparty == 1 ~ scan_ml_product_seller_name,
+        scan_ml_product_available == 0  & scan_ml_product_buybox_win == 1 & scan_ml_product_3thparty == 0 ~ "",
+        scan_ml_product_available == 0  & scan_ml_product_buybox_win == 0 & scan_ml_product_3thparty == 1 ~ scan_ml_product_seller_name,
+        scan_ml_product_available == 0  & scan_ml_product_buybox_win == 0 & scan_ml_product_3thparty == 0 ~ "",
+        .default  = ""
+      )) |>
+      select(-scan_ml_product_available, -scan_ml_product_buybox_win, -scan_ml_product_3thparty) |>
+      mutate(scan_ml_product_seller_name = seller01) |>
+      select(-seller01) |>
+      unique()
     
     alerts_fds <- alerts_fds |>
       inner_join(sellers)
