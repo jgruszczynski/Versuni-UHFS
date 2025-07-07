@@ -111,5 +111,6 @@ for (i in c(1:nrow(pr_map)) ) {
   
   source("Versuni-UHFS.R")
   source("PowerBi_refresher.R")
+  source("UHFS-Alerts.R")
   toc()  
 }
