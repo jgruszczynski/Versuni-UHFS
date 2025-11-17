@@ -104,6 +104,6 @@ for (i in c(1:nrow(pr_map)) ) {
   print(paste0(i, ": ", project_id, " | ",date))
   
   source("DeLonghi-UHFS.R")
-  #source("PowerBi_refresher.R")
+  source("PowerBi_refresher.R")
   toc()  
 }
